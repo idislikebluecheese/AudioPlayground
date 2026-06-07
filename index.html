@@ -24,6 +24,7 @@
 </body>
 <script>
         let on = false
+        let started = false
         const q = (a) => document.getElementById(a)
         const volume = q('volume')
         const pitch = q('pitch')
@@ -46,7 +47,6 @@
         osc.frequency.value = 1000
         osc.connect(gain)
         gain.connect(audioCtx.destination)
-        osc.start()
         volume.addEventListener('input',_ => {
             const val = volume.value
             if(on) gain.gain.value = val / 100
@@ -60,6 +60,10 @@
         toggle.onclick = () => {
             on = !on
             if(on) {
+                if(!started) {
+                    osc.start()
+                    started = true
+                }
                 gain.gain.value = volume.value / 100
                 toggle.innerText = 'Stop'
             }  else {
