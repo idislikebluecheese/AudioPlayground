@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Playground</title>
+</head>
+
+<body>
+    <h1>Audio Playground</h1>
+    <input type="range" id="volume" min=0 max=100 value=100><label for="volume" id="volLabel">Volume 100%</label>
+    <input type="range", id="pitch" min=1 max=1000 value=1000><label for="pitch" id="pitchLabel">Pitch 1000Hz</label>
+    <button id="adjust">Adjust Pitch Slider</button>
+    <br>
+    <select id="type">
+        <option selected>Sine</option>
+        <option>Square</option>
+        <option>Sawtooth</option>
+        <option>Triangle</option>
+    </select><label for="type">Sound Wave Shape</label>
+    <br>
+    <button id="toggle">Start</button>
+</body>
+<script>
+        let on = false
+        const q = (a) => document.getElementById(a)
+        const volume = q('volume')
+        const pitch = q('pitch')
+        const toggle = q('toggle')
+        const shape = q('type')
+        q('adjust').onclick = () => {
+            const current = pitch.value
+            const currentMax = pitch.max
+            const desire = Number(prompt('This will set the highest point your pitch slider can reach\nPlease pick a number between 100-20000'))
+            if(isNaN(desire) || (desire > 20000 || desire < 100)) window.alert('Invalid Number')
+            else {
+              pitch.max = desire
+              if(pitch.value > desire) pitch.value = desire  
+            }
+        }
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain()
+        gain.gain.value = 0
+        osc.frequency.value = 1000
+        osc.connect(gain)
+        gain.connect(audioCtx.destination)
+        osc.start()
+        volume.addEventListener('input',_ => {
+            const val = volume.value
+            if(on) gain.gain.value = val / 100
+            q('volLabel').innerText = `Volume ${val}%`
+        })
+        pitch.addEventListener('input',_ => {
+            const val = pitch.value
+            osc.frequency.value = val
+            q('pitchLabel').innerText = `Pitch ${val}Hz`
+        })
+        toggle.onclick = () => {
+            on = !on
+            if(on) {
+                gain.gain.value = volume.value / 100
+                toggle.innerText = 'Stop'
+            }  else {
+                gain.gain.value = 0
+                toggle.innerText = 'Start'
+            }
+        }
+        shape.addEventListener('input',_ => {
+            osc.type = shape.value.toLowerCase()
+        })
+</script>
+
+</html>
